@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load course_custom_tags %}
+{% load static %}
+{% block title %} Add Course {% endblock %}
+{% block content %}
+<style>
+    .loading_container {
+        position: absolute;
+        top: 30%;
+        width: 100%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading_container .ring {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: -30px;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        border-top: 4px solid #24ecff;
+        animation: animate 4s linear infinite;
+    }
+
+    @keyframes animate {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading_container .ring::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        background: #24ecff;
+        box-shadow: 0 0 0 5px #24ecff33,
+            0 0 0 10px #24ecff22,
+            0 0 0 20px #24ecff11,
+            0 0 20px #24ecff,
+            0 0 50px #24ecff;
+    }
+
+    .loading_container .ring:nth-child(2) {
+        animation: animate2 4s linear infinite;
+        animation-delay: -1s;
+        border-top: 4px solid transparent;
+        border-left: 4px solid #93ff2d;
+    }
+
+    .loading_container .ring:nth-child(2)::before {
+        content: '';
+        position: absolute;
+        top: initial;
+        bottom: 12px;
+        left: 12px;
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        background: #93ff2d;
+        box-shadow: 0 0 0 5px #93ff2d33,
+            0 0 0 10px #93ff2d22,
+            0 0 0 20px #93ff2d11,
+            0 0 20px #93ff2d,
+            0 0 50px #93ff2d;
+    }
+
+    @keyframes animate2 {
+        0% {
+            transform: rotate(360deg);
+        }
+
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
+    .loading_container .ring:nth-child(3) {
+        animation: animate2 4s linear infinite;
+        animation-delay: -3s;
+        position: absolute;
+        top: -66.66px;
+        border-top: 4px solid transparent;
+        border-left: 4px solid #e41cf8;
+    }
+
+    .loading_container .ring:nth-child(3)::before {
+        content: '';
+        position: absolute;
+        top: initial;
+        bottom: 12px;
+        left: 12px;
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        background: #e41cf8;
+        box-shadow: 0 0 0 5px #e41cf833,
+            0 0 0 10px #e41cf822,
+            0 0 0 20px #e41cf811,
+            0 0 20px #e41cf8,
+            0 0 50px #e41cf8;
+    }
+
+    .loading_container p {
+        position: absolute;
+        color: #fff;
+        font-size: 1.5em;
+        font-family: consolas;
+        bottom: -80px;
+        letter-spacing: 0.15em;
+    }
+</style>
+<div>
+    <h4>Add Course from here</h4>
+    <div class="container text-center">
+        <form action="{% url 'add_course' %}" method="post" enctype="multipart/form-data" id="course_form">
+            {% csrf_token %}
+            <div class="form-group p-1">
+                <input type="text" name="name" id="name" value="" placeholder="Enter course name"
+                    class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1">
+                <input type="text" name="slug" id="slug" value="" placeholder="Enter unique keyword for course"
+                    title="slug will be the unique keyword for your course" class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1">
+                <input type="text" name="description" id="description" value="" placeholder="Enter course description"
+                    class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1">
+                <input type="number" name="length" id="length" value="" placeholder="Enter course length in hours"
+                    class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1">
+                <input type="number" name="price" id="price" value="" placeholder="Enter course price"
+                    class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1">
+                <input type="number" name="discount" id="discount" value=""
+                    placeholder="Enter percentage amount for course discount" class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1 d-flex">
+                <label for="thumbnail">Upload thumbnail</label>
+                <input type="file" name="thumbnail" id="thumbnail" value="" class="form-control form-control-sm">
+            </div>
+            <div class="form-group p-1 d-flex">
+                <label for="file">Upload Resources </label>
+                <input type="file" name="file" id="file" value="" class="form-control form-control-sm">
+            </div>
+            <input type="submit" value="Submit" id="submit_button" onclick="loading_function()">
+        </form>
+    </div>
+</div>
+<div class="loading_container">
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <p style="color: black;">Loading...</p>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    console.log("js loaded");
+    let thumbnail = document.getElementById("thumbnail");
+    let file = document.getElementById("file");
+    const fileSize = 1024 * 1024;
+
+    thumbnail.addEventListener("change", function (e) {
+        if (thumbnail.files[0].size > fileSize * 5) {
+            alert("thumbnail file size is too try..Accept file max of 5mb.");
+            thumbnail.value = "";
+        }
+    });
+    file.addEventListener("change", function (e) {
+        if (file.files[0].size > fileSize * 20) {
+            alert("Resource file size is too try..Accept file max of 10mb.");
+            file.value = "";
+        }
+    });
+
+    function loading_function() {
+
+        if (thumbnail.value && file.value) {
+            document.getElementById('course_form').submit()
+            document.getElementsByClassName('loading_container')[0].style.display = 'flex'
+            document.getElementById('submit_button').disabled = true
+        }
+    }
+
+</script>
+{% endblock %}

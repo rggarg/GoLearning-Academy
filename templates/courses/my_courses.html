@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load course_custom_tags %}
+{% block title %} My Courses {% endblock %}
+{% block content %}
+<div class="container">
+    <h1>My Courses</h1>
+    <hr>
+    <br><br>
+    {% if user_course %}
+    <div class="container-fluid row">
+        {% for uc in user_course %}
+        <div class="col">
+            <div class="card mx-auto" style="width: 18rem">
+                <img src="{{uc.course.thumbnail}}" class="card-img-top" alt="..." height="200" />
+                <div class="card-body">
+                    <h5 class="card-title">{{uc.course.name}}</h5>
+                    <p class="card-text">{{uc.course.description|truncatechars:50}}</p>
+                </div>
+                <div class="card-footer p-0">
+                    <div class="row no-gutters">
+                        <div class="text-center">
+                            <a href="/course/{{uc.course.slug}}" class="btn btn-light btn-block">Start Course</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <h5>You don't enrolled in any course. Please enroll in any course to start learning.</h5>
+    {% endif %}
+</div>
+{% endblock %}

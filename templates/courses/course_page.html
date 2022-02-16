@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load course_custom_tags %}
+{% load static %}
+{% block title %} Course Page {% endblock %}
+{% block content %}
+<style>
+    .no-preview {
+        cursor: not-allowed;
+    }
+
+    .active-video {
+        background-color: rgba(0, 68, 255, 0.555);
+    }
+
+    .active-video-link {
+        color: rgb(255, 255, 255);
+    }
+
+    a,
+    a:hover {
+        text-decoration: none;
+    }
+
+    .active-video-link:hover {
+        text-decoration: none;
+        color: rgb(255, 255, 255);
+    }
+</style>
+<div class="container-fluid">
+    {% include 'partials/messages.html' %}
+    <div class="d-flex ps-5 mt-3 flex-wrap">
+        <button id="videos" class="btn btn-outline-primary mt-1 mx-2">Videos</button>
+        <button id="about" class="btn btn-outline-primary mt-1 mx-2">About</button>
+        <a class="nav-link btn btn-outline-primary mx-2 mt-1" href="{% url 'take_quiz' course.slug %}">Take Quiz</a>
+        <button id="doubt" class="nav-link btn btn-outline-primary mt-1 mx-2">Ask Doubts</button>
+    </div>
+    <div id="videos_page">
+        <br>
+        <div class="card p-3">
+            <div class="row">
+                <!-- youtube player -->
+                <div class="col-lg-9 col-sm-12">
+                    <div class="mx-auto">
+                        <video class="mx-auto" controls width="100%" height="315" id="player">
+                            <source src="{{video.video_id}}" type="video/mp4">
+                            </source>
+                        </video>
+                        <!-- <iframe id="player" class="mx-auto" width="100%" height="315"
+                            src="https://www.youtube.com/embed/{{video.video_id}}" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe> -->
+                    </div>
+                </div>
+                <!-- lecture list -->
+                <div class="col-lg-3 col-sm-12">
+                    <ul id="video_list" class="list-group" style="overflow-y: scroll;">
+                        {% is_enrolled request course as enrolled %}
+                        {% for v in videos %}
+                        <li
+                            class="list-group-item d-flex justify-content-between {% if v == video %} active-video {% endif %}">
+                            <a class="
+                            {% if not active_course and not v.is_preview %} text-muted no-preview {% endif %} 
+                            {% if active_course and v == video   %} active-video-link {% endif %}"
+                                href="?lecture={{v.serial_number}}">{{v}}</a>
+                            <i class="material-icons" id="icon">offline_pin</i>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="about_page">
+        <!-- course details -->
+        <div class="mt-3">
+            <h5>{{course.name}}</h5>
+            <div class="d-flex row">
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <img src="{{course.thumbnail}}" height="200px" width="100%">
+                </div>
+                <div class="col-lg-8 col-md-8 col-sm-12">
+                    <p style="height: 200px;overflow-y: scroll;">{{course.description}}</p>
+                </div>
+
+            </div>
+        </div>
+        {% if course.prequisite %}
+        <!-- prerequisite details -->
+        <div class="mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Prerequisite</h5>
+                    <p class="card-text">
+                        {% for pre in course.prerequisite_set.all %}
+                        <li>{{pre.description}}</li>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- learnings details -->
+        {% if course.learning %}
+        <div class="mt-3 mb-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Learnings</h5>
+                    <p class="card-text">
+                        {% for learning in course.learning_set.all %}
+                        <li>{{learning.description}}</li>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- learning end -->
+
+        <!-- to show pdf viewer -->
+        <!-- <iframe src="https://res.cloudinary.com/rohitgarg/image/upload/v1640283769/yjtwbpimq9oogepffszw.pdf"
+            width="100%" height="500px">
+        </iframe> -->
+
+    </div>
+    <!-- doubt page -->
+    <div id="doubt_page">
+        <div class="container">
+            <div class="mt-2 text-center">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="text" name="doubt_question" placeholder="Ask Doubts" style="width: 90%;">
+                    <input type="submit" value="Ask" class="btn btn-outline-primary ms-2" style="width: 5%;">
+                </form>
+            </div>
+            {% for question in questions %}
+            <div class="border border-info p-1 mt-2">
+                <p class="m-0 fw-bold">{{question.user}}</p>
+                <p class="m-0">{{question}}</p>
+
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#commentModal" onclick="get_data('{{question.pk}}')">
+                    View Comments
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel"></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="modal_body">
+                            </div>
+                            <div class="modal-footer">
+                                <form action="" method="post" class="d-flex">
+                                    {% csrf_token %}
+                                    <input type="text" id="doubt_aq" name="doubt_aq" hidden>
+                                    <input type="text" name="doubt_answer" value="{{value}}" placeholder="Add Comments"
+                                        class="mx-2">
+                                    <button type="submit" class="btn btn-outline-primary">Add Comment</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    let player = document.getElementById('player');
+    let videos = document.getElementById("videos");
+    let icon = document.getElementById("icon");
+    let about = document.getElementById("about");
+    let doubt = document.getElementById("doubt");
+    let videos_page = document.getElementById("videos_page");
+    let about_page = document.getElementById("about_page");
+    let doubt_page = document.getElementById("doubt_page");
+    let modal = document.getElementById("modal_body");
+    let doubt_aq = document.getElementById("doubt_aq");
+    let modalLabel = document.getElementById("exampleModalLabel");
+    let time_started = -1;
+    let time_played = 0;
+    let duration = 0;
+
+    document.onreadystatechange = () => {
+        if (document.readyState == 'interactive') {
+            video_list = document.getElementById('video_list');
+            maintainRatio();
+        }
+    }
+    maintainRatio = () => {
+        let w = player.clientWidth;
+        let h = (w * 9) / 16;
+        player.height = h;
+        video_list.style.maxHeight = h + 'px';
+    }
+    window.onresize = maintainRatio;
+
+    videos.addEventListener("click", function (e) {
+        videos_page.style.display = 'block';
+        about_page.style.display = 'none';
+        doubt_page.style.display = "none";
+    })
+    about.addEventListener("click", function (e) {
+        about_page.style.display = 'block';
+        videos_page.style.display = 'none';
+        doubt_page.style.display = "none";
+    })
+    doubt.addEventListener("click", function (e) {
+        doubt_page.style.display = 'block';
+        videos_page.style.display = 'none';
+        about_page.style.display = "none";
+    })
+
+    window.onload = function () {
+        about_page.style.display = 'none';
+        doubt_page.style.display = "none";
+        videos_page.style.display = 'block';
+    }
+
+    function preventForm() {
+        return false
+    }
+    function get_data(question_id) {
+        console.log("question_id ", question_id)
+        doubt_aq.value = question_id;
+        fetch(`/get_answer/${question_id}`, {
+            method: "GET",
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                const json = JSON.parse(data.answers)
+                modal.innerHTML = ''
+                console.log(json);
+                document.getElementById('exampleModalLabel').innerHTML = `Comments(${json.length})`
+                for (var i = 0; i < json.length; i++) {
+                    const ans = document.createElement('p');
+                    ans.innerHTML = json[i].fields.answer;
+                    ans.style.borderBottom = "1px solid black"
+                    modal.appendChild(ans)
+                }
+
+
+            })
+    }
+    player.addEventListener('play', function () {
+        time_started = new Date().getTime() / 1000;
+    })
+    player.addEventListener('playing', function () {
+        time_started = new Date().getTime() / 1000;
+    })
+    player.addEventListener('pause', function (event) {
+        duration = player.duration;
+        if (time_started > 0) {
+            let playedfor = new Date().getTime() / 1000 - time_started;
+            time_started = -1;
+            time_played += playedfor;
+        }
+        if (time_played >= (duration / 2) && event.type == 'ended') {
+            icon.style.color = 'green';
+        }
+    })
+    player.addEventListener('ended', function (event) {
+        duration = player.duration;
+        if (time_started > 0) {
+            let playedfor = new Date().getTime() / 1000 - time_started;
+            time_started = -1;
+            time_played += playedfor;
+        }
+        if (time_played >= (duration / 2) && event.type == 'ended') {
+            icon.style.color = 'green';
+
+        }
+    })
+
+</script>
+{% endblock %}

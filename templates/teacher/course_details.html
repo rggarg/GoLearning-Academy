@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="text-center ">
+        <input type="text" placeholder="Search quiz question" id="input" onkeyup="myFunction()"
+            title="Search with course" style="width: 50%;">
+    </div>
+    <table class="table table-striped mt-4" id="table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Slug</th>
+                <th>Price</th>
+                <th>Length</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{course.name}}</td>
+                <td>{{course.slug}}</td>
+                <td>{{course.price}}₹</td>
+                <td>{{course.length}}</td>
+                <td><a class="btn btn-outline-secondary" href="{% url 'add_question' course.slug %}">Add
+                        Quiz</a> </td>
+                <td><a class="btn btn-outline-secondary" href="{% url 'add_video' course.slug %}">Add
+                        Video</a> </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    function myFunction() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("input");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("table");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

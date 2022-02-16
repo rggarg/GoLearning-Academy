@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-evenly row mt-3">
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">{{courses|length}}</div>
+                <div class="card-body">
+                    <h5 class="card-title">Total number of Courses Created</h5>
+                    <p class="card-text">more information <a href="{% url 'course_details' %}"
+                            class="float-end text-light" style="cursor: pointer;">></a></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">{{user_courses|length}}</div>
+                <div class="card-body">
+                    <h5 class="card-title">Total number of Learners</h5>
+                    <p class="card-text">more information <a href="{% url 'learner_details' %}"
+                            class="float-end text-light" style="cursor: pointer;">></a>></span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">{{quizes|length}}</div>
+                <div class="card-body">
+                    <h5 class="card-title">Total number of Quiz Questions</h5>
+                    <p class="card-text">more information <a href="{% url 'quiz_details' %}"
+                            class="float-end text-light" style="cursor: pointer;">></a></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="container mt-5" style="overflow-x: scroll;">
+    <h3>Requests of users to enroll in your courses</h3>
+    <table class="table table-striped mt-4" id="table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Name</th>
+                <th>Roll_No.</th>
+                <th>Email</th>
+                <th>Organization</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course_request in course_requests %}
+            <tr>
+                <td>{{course_request.4}}</td>
+                <td>{{course_request.1}}</td>
+                <td>{{course_request.3}}</td>
+                <td>{{course_request.2}}</td>
+                <td>{{course_request.5}}</td>
+                <td><a class="btn btn-outline-secondary" href="{% url 'allow_user' course_request.0 %}">Allow User</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

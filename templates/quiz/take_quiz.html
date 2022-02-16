@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-3">
+    <h2 class="mb-5 text-center">Quiz for {{course.name}}</h2>
+    <form action="{% url 'take_quiz' course.slug %}" method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+        <div class="mt-4">
+            <h3 name="question" id="question" class="form-control">Ques. <span class="ps-4 fw-bold">
+                    {{question.question}}</span></h3>
+        </div>
+        <div class="form-check mt-1">
+            <input class="form-check-input mt-1" id="radiobutton1" type="radio" name="{{question.question}}"
+                value="{{question.option1}}" aria-label="Radio button for following text input">
+            <label for="radiobutton1" class="form-check-label">{{question.option1}}</label>
+        </div>
+        <div class="form-check mt-1">
+            <input class="form-check-input mt-1" id="radiobutton2" type="radio" name="{{question.question}}"
+                value="{{question.option2}}" aria-label="Radio button for following text input">
+            <label for="radiobutton2" class="form-check-label">{{question.option2}}</label>
+        </div>
+        <div class="form-check mt-1">
+            <input class="form-check-input mt-1" id="radiobutton3" type="radio" name="{{question.question}}"
+                value="{{question.option3}}" aria-label="Radio button for following text input">
+            <label for="radiobutton3" class="form-check-label">{{question.option3}}</label>
+        </div>
+        <div class="form-check mt-1">
+            <input class="form-check-input mt-1" id="radiobutton4" type="radio" name="{{question.question}}"
+                value="{{question.option4}}" aria-label="Radio button for following text input">
+            <label for="radiobutton4" class="form-check-label">{{question.option4}}</label>
+        </div>
+        {% endfor %}
+
+        <input type="submit" value="Submit" class="btn btn-outline-success my-4">
+
+    </form>
+
+</div>
+
+
+{% endblock %}

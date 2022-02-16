@@ -1,0 +1,170 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <div class="card mt-5">
+            <div class="card-body">
+                {% include 'partials/messages.html' %}
+                <div class="text-center">
+                    <img src="https://res.cloudinary.com/rohitgarg/image/upload/v1640243705/logo1_rnuvwu.png" alt=""
+                        width="100" height="70">
+                </div>
+                <div class="card-title py-3 text-center">
+                    <h4>Register</h4>
+                </div>
+
+                <form action="{% url 'register' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group p-1">
+                        <input type="text" name="username" id="usernameField" value="{{fieldValues.username}}"
+                            placeholder="Enter your username" class="form-control form-control-sm">
+                    </div>
+                    <div class="invalid-feedback p-1" style="display: none;"></div>
+                    <div class="form-group p-1">
+                        <input type="email" name="email" id="emailField" value="{{fieldValues.email}}"
+                            placeholder="Enter your email" class="form-control form-control-sm">
+                    </div>
+                    <div class="invalid-email-feedback p-1" style="display: none;"></div>
+                    <div class="form-group p-1">
+                        <input type="password" name="password" id="passwordField" placeholder="Enter your password"
+                            class="form-control form-control-sm">
+                        <small class="pass-show-btn">SHOW</small>
+                    </div>
+                    <div class="invalid-password-feedback p-1" style="display: none;"></div>
+                    <div class="form-group p-4 d-flex justify-content-around">
+                        <div>
+                            <input type="radio" id="student" name="role" value="student" class="form-check-input"
+                                checked>
+                            <label for="student" class="form-check-label">Student</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="teacher" name="role" value="teacher" class="form-check-input">
+                            <label for="teacher" class="form-check-label">Teacher</label>
+                        </div>
+                    </div>
+
+                    <input type="submit" value="Register" class="btn btn-block btn-primary register-btn">
+                </form>
+                <div class="container">
+                    <span>Have a account?</span><a href="{% url 'login' %}">Login</a><br>
+                    <span>Forgot passowrd?</span><a href="{% url 'request-password' %}">Reset it</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-4"></div>
+</div>
+<script>
+    console.log('hello')
+    const usernameField = document.querySelector("#usernameField");
+    const feedbackArea = document.querySelector(".invalid-feedback");
+    const emailField = document.querySelector("#emailField");
+    const emailFeedbackArea = document.querySelector(".invalid-email-feedback");
+    const showPassToggle = document.querySelector('.pass-show-btn');
+    const passwordField = document.querySelector('#passwordField')
+    const registerBtn = document.querySelector('.register-btn')
+    const passwordFeedbackArea = document.querySelector(".invalid-password-feedback")
+
+    showPassToggle.addEventListener('click', (e) => {
+        if (showPassToggle.textContent === 'SHOW') {
+            showPassToggle.textContent = 'HIDE'
+            passwordField.setAttribute("type", "text")
+        }
+        else {
+            showPassToggle.textContent = 'SHOW'
+            passwordField.setAttribute("type", "password")
+        }
+
+    })
+
+    usernameField.addEventListener("keyup", (e) => {
+        const usernameVal = e.target.value;
+        console.log("entered username");
+        usernameField.classList.remove("is-invalid");
+        feedbackArea.style.display = "none";
+        feedbackArea.innerHTML = ``;
+
+        if (usernameVal.length > 0) {
+            fetch("/authentication/validate-username", {
+                body: JSON.stringify({ username: usernameVal }),
+                method: "POST",
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+
+                    if (data.username_error) {
+                        registerBtn.disabled = true;
+                        usernameField.classList.add("is-invalid");
+                        feedbackArea.style.display = "block";
+                        feedbackArea.innerHTML = `<p>${data.username_error}</p>`;
+                    }
+                    else {
+                        registerBtn.removeAttribute('disabled');
+                    }
+                });
+        }
+    });
+
+    passwordField.addEventListener("keyup", (e) => {
+        const passwordVal = e.target.value;
+        console.log("entered password");
+        passwordField.classList.remove("is-invalid");
+        passwordFeedbackArea.style.display = "none";
+        passwordFeedbackArea.innerHTML = ``;
+
+        if (passwordVal.length > 0) {
+            fetch("/authentication/validate-password", {
+                body: JSON.stringify({ password: passwordVal }),
+                method: "POST",
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+
+                    if (data.password_error) {
+                        registerBtn.disabled = true;
+                        passwordField.classList.add("is-invalid");
+                        passwordFeedbackArea.style.display = "block";
+                        passwordFeedbackArea.innerHTML = `<p>${data.password_error}</p>`;
+                    }
+                    else {
+                        registerBtn.removeAttribute('disabled');
+                    }
+                });
+        }
+    });
+
+    emailField.addEventListener("keyup", (e) => {
+        const emailVal = e.target.value;
+
+        emailField.classList.remove("is-invalid");
+        emailFeedbackArea.style.display = "none";
+        emailFeedbackArea.innerHTML = ``;
+
+        if (emailVal.length > 0) {
+            fetch("/authentication/validate-email", {
+                body: JSON.stringify({ email: emailVal }),
+                method: "POST",
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log("data", data);
+                    if (data.email_error) {
+                        registerBtn.disabled = true;
+                        emailField.classList.add("is-invalid");
+                        emailFeedbackArea.style.display = "block";
+                        emailFeedbackArea.innerHTML = `<p>${data.email_error}</p>`;
+                    }
+                    else {
+                        registerBtn.removeAttribute('disabled');
+                    }
+                });
+        }
+    });
+
+</script>
+{% endblock %}

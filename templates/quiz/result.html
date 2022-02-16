@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    {% if percentage > 70 %}
+    <h3 class="text-success "> Congratulations!! You are eligible for certificate. </h3>
+    {% endif %}
+    <p>Score : {{score}}</p>
+    <p>Percentage : {{percentage}}</p>
+    <p>Correct : {{correct}}</p>
+    <p>Wrong : {{wrong}}</p>
+
+
+</div>
+
+{% endblock %}
